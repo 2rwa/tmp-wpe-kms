@@ -15,7 +15,7 @@ jobs:
   noble:
     name: Build official WPE 2.54.1 source on Ubuntu 24.04
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - name: Preflight script and CPU compatibility
