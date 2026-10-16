@@ -1,0 +1,62 @@
+name: Build WPE 2.54.1 for Ubuntu 24.04 Core2
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-wpe-noble.yml
+      - scripts/build-noble.sh
+      - src/main.c
+      - docs/index.html
+      - docs/app.js
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  noble:
+    name: Build official WPE 2.54.1 source on Ubuntu 24.04
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preflight script and CPU compatibility
+        shell: bash
+        run: |
+          bash -n scripts/build-noble.sh
+          grep -q 'march=core2' scripts/build-noble.sh
+          grep -q 'ENABLE_WPE_PLATFORM_DRM=ON' scripts/build-noble.sh
+          grep -q 'ENABLE_WPE_PLATFORM_WAYLAND=OFF' scripts/build-noble.sh
+          df -h /
+      - name: Free disk space for WPE source build
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Build and test WPE and package runtime
+        shell: bash
+        run: bash scripts/build-noble.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wpe-ubuntu2404-core2-runtime
+          path: |
+            dist/*.tar.xz
+            dist/SHA256SUMS
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish verified runtime as release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: core2-noble-wpe-2.54.1
+          name: WPE 2.54.1 Core2 (Ubuntu 24.04)
+          prerelease: true
+          make_latest: false
+          body: |
+            Compiled from upstream WPE WebKit 2.54.1 source on Ubuntu 24.04,
+            x86_64 Core2 target with no SSE4/AVX requirement.
+            Includes DRM and headless WPEPlatform, excludes X11/Wayland.
+            Headless WebKit DOM test runs in CI before this prerelease is published.
+            Install under /home/github-runner/wpe-2.54.1, see docs/BUILD.md.
+            This is an experimental artifact; actual Core2 DRM display must be tested separately.
+          files: |
+            dist/wpe-webkit-2.54.1-ubuntu2404-core2-x86_64.tar.xz
+            dist/SHA256SUMS
