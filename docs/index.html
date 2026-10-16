@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>tmp-wpe-kms | WPE WebKit / DRM-KMS build lab</title>
+<link rel="stylesheet" href="./style.css">
+<script src="./app.js" defer></script>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">2GB RAM · Ubuntu Server · VGA/DRM-KMS</p>
+<h1>WPE WebKit <span>Direct Display Lab</span></h1>
+<p class="intro">X11・Wayland・デスクトップ環境なしでHTML UIを描画するための、WPEPlatform 2.0 + DRM/KMS 実験。</p>
+<div class="links"><a href="https://github.com/2rwa/tmp-wpe-kms">Repository ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/actions">GitHub Actions ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/BUILD.md">技術詳細 ↗</a></div>
+</header>
+<section class="overview">
+<article class="panel"><span class="tag">CI BUILD</span><h2>Launcher + WPE 2.54+</h2><p>Debian sid のWPE WebKit開発パッケージを使い、実際のCランチャーをgccでコンパイル。DRMとheadless両バックエンドの存在を確認。</p></article>
+<article class="panel"><span class="tag">REGRESSION</span><h2>Headless / Browser</h2><p>WebKit headlessでHTMLを読み込み、ボタン操作 → 状態更新 → 表示変更を検証。Pages用のUIもChromiumで操作テスト。</p></article>
+<article class="panel"><span class="tag">TARGET</span><h2>No compositor</h2><p>ターゲットはUbuntu Serverの実機。<code>/dev/dri/card*</code>のGPU出力を使用。SSHで管理し、X11/Waylandは起動しません。</p></article>
+</section>
+<section class="panel status"><span class="tag">LATEST BUILD</span><h2 id="ci-status" aria-live="polite">Actions結果を読み込み中</h2><p>Commit <code id="ci-commit">—</code> · WPE version <code id="ci-version">—</code></p><a id="ci-link" href="https://github.com/2rwa/tmp-wpe-kms/actions">Actionsの実行ログを見る ↗</a><p class="muted">Actionsの成功だけではVGA実機での描画成功を意味しません。</p></section>
+<section class="panel"><span class="tag">INTERACTIVE DEMO</span><h2>起動コマンド・表示設定の確認</h2><p>以下はブラウザ上の設定プレビューです。ここで押してもPCのDRM/KMSは起動しません。</p>
+<div class="controls"><button id="mode-button" aria-pressed="false">メモリモード切替</button><strong id="mode-label">通常表示</strong><label for="platform-selector">Backend</label><select id="platform-selector"><option value="drm">DRM/KMS（実機）</option><option value="headless">Headless（CI）</option></select></div>
+<pre><code id="command">WPE_PLATFORM=drm ./dist/wpe-kms-launcher http://127.0.0.1:8080/</code></pre>
+</section>
+<section class="panel"><span class="tag">BUILD FLOW</span><h2>どこまで実証できるか</h2><ol><li><strong>静的テスト</strong> — JSの構文とUI動作</li><li><strong>ネイティブビルド</strong> — WPEPlatform 2.0 C APIへリンク</li><li><strong>WebKit実行テスト</strong> — headlessで読み込み→操作→描画状態の反映</li><li><strong>実機テスト（未実施）</strong> — Ubuntu + VGA + DRM/KMS表示、入力、2GBでのメモリ測定</li></ol></section>
+<footer>Experimental project · Binary built on Debian sid is not guaranteed to run on Ubuntu without rebuild · <a href="https://wpewebkit.org/about/faq.html">WPE FAQ ↗</a></footer>
+</main>
+</body>
+</html>

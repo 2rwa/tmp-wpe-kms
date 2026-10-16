@@ -1,0 +1,122 @@
+name: Build, regression and Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    name: Static and interactive UI regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preflight checks
+        run: |
+          node --check docs/app.js
+          python3 - <<'PY'
+          from pathlib import Path
+          page=Path('docs/index.html').read_text()
+          script=Path('docs/app.js').read_text()
+          for key in ('mode-button','mode-label','platform-selector','command','ci-status'):
+              assert f'id="{key}"' in page, key
+              assert f'"{key}"' in script, key
+          print('PASS: documentation controls and wiring')
+          PY
+      - name: Install browser test dependencies
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Test UI interaction and redraw
+        run: |
+          python3 -m http.server 8765 --directory docs > /tmp/wpe-page-server.log 2>&1 &
+          sleep 2
+          node tests/test_ui.mjs
+
+  wpe:
+    name: Compile WPEPlatform launcher and test real WebKit headless
+    runs-on: ubuntu-24.04
+    container:
+      image: debian:sid
+      options: --shm-size=1g
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install WPE 2.54+ packages
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends             build-essential pkg-config file binutils ca-certificates             libwpewebkit-2.0-dev libgl1-mesa-dri libgbm1
+      - name: Inspect platform and build native launcher
+        run: |
+          set -eux
+          pkg-config --modversion wpe-webkit-2.0
+          pkg-config --atleast-version=2.54 wpe-webkit-2.0
+          pkg-config --exists wpe-platform-2.0
+          pkg-config --exists wpe-platform-drm-2.0
+          pkg-config --exists wpe-platform-headless-2.0
+          make
+          file dist/wpe-kms-launcher
+          ldd dist/wpe-kms-launcher
+          pkg-config --modversion wpe-webkit-2.0 > wpe-version.txt
+      - name: Actual WebKit headless DOM/interaction test
+        env:
+          WPE_PLATFORM: headless
+          WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS: "1"
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          EGL_PLATFORM: surfaceless
+        run: make check
+      - name: Collect binary + version
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpe-launcher-debian-sid-amd64
+          path: |
+            dist/wpe-kms-launcher
+            wpe-version.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+  pages:
+    name: Publish test dashboard
+    if: always() && !cancelled()
+    needs: [browser, wpe]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare published report
+        env:
+          UI_RESULT: ${{ needs.browser.result }}
+          WPE_RESULT: ${{ needs.wpe.result }}
+          RUN_ID: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir -p site
+          cp docs/index.html docs/app.js docs/style.css site/
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = {
+            "browser": os.environ["UI_RESULT"],
+            "wpe": os.environ["WPE_RESULT"],
+            "sha": os.environ["SHA"],
+            "run_url": "https://github.com/" + os.environ["REPO"] + "/actions/runs/" + os.environ["RUN_ID"],
+            "wpe_version": "2.54+ (required; exact value in Actions artifact)"
+          }
+          Path("site/results.json").write_text(json.dumps(data, ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
