@@ -13,7 +13,7 @@ echo "::group::Install build dependencies"
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
   build-essential ninja-build cmake pkg-config python3 perl ruby bison flex gperf gettext \
-  curl xz-utils ca-certificates file patchelf git lld clang unifdef \
+  curl xz-utils ca-certificates file patchelf git lld clang unifdef time \
   libglib2.0-dev libharfbuzz-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev \
   libxml2-dev libxslt1-dev libsqlite3-dev libgcrypt20-dev libtasn1-6-dev \
   libepoxy-dev libsoup-3.0-dev libfreetype-dev libfontconfig-dev \
@@ -58,8 +58,31 @@ cmake -S "$src" -B build -GNinja \
  -DUSE_LIBHYPHEN=OFF -DUSE_LCMS=OFF
 echo "::endgroup::"
 echo "::group::Build on hosted runner, never on Core2"
-# Build only 2 parallel compilations to avoid memory pressure and OOM.
-cmake --build build --parallel 2
+# Hosted Ubuntu 24.04 public runner: 4 vCPU / 16 GiB. Track memory and disk.
+echo "CPU_COUNT=$(nproc)"
+free -h
+df -h .
+echo "::group::Resource sampler (every 60 seconds)"
+(
+  while true; do
+    printf 'RESOURCES %s: ' "$(date -Is)"
+    free -m | grep '^Mem:'
+    df -h . | tail -1
+    sleep 60
+  done
+) &
+resource_monitor=$!
+echo "::endgroup::"
+set +e
+/usr/bin/time -v cmake --build build --parallel 4
+build_status=$?
+set -e
+kill "$resource_monitor" 2>/dev/null || true
+wait "$resource_monitor" 2>/dev/null || true
+echo "BUILD_EXIT_CODE=$build_status"
+free -h
+df -h .
+if [ "$build_status" -ne 0 ]; then exit "$build_status"; fi
 echo "::endgroup::"
 echo "::group::Install and build launcher"
 cmake --install build
