@@ -55,3 +55,12 @@ WPE_PLATFORM=drm ./dist/wpe-kms-launcher http://127.0.0.1:8080/
 初回CIではWPE 2.54.1ランチャーのビルドは成功しましたが、headlessテストで `FAIL: controls missing` が発生。ブラウザUIテストは成功していたため、`file://` スキームで期待したHTMLを取得できない可能性を切り分けました。以後、実運用と同じローカルHTTPサーバを `make check` が起動し、`http://127.0.0.1:8766/` でテストします。さらに `shared-mime-info` を導入します。
 
 WPEのJavaScript評価結果でDOM要素の存在、クリック操作、選択変更、再描画を検証します。ビルド成功だけで合格とはみなしません。
+
+
+## Core2 実機表示テスト（2026-10-16）
+
+詳細: [CORE2.md](CORE2.md)。Core2上でGBM/EGL/GLES2のコンテキスト生成、DRM master取得・解放が成功。
+HTMLをheadless ChromiumでPNGにレンダリングし、i915drmfbの1280x800/32bitメモリに転送。
+書き込み前にフレームバッファを退避し、書き込み後のreadbackと5秒後のrestoreが成功した。
+これは **WPE WebKitによる直接出力ではない**。WPE本体はCore2にまだインストールされていない。
+Core2の表示光学系の視認確認も未実施。
