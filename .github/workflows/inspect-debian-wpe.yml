@@ -1,0 +1,33 @@
+name: Inspect Debian WPE packaging (same version)
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/inspect-debian-wpe.yml
+      - scripts/inspect-debian-wpe.sh
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell preflight
+        run: bash -n scripts/inspect-debian-wpe.sh
+      - name: Download and verify Debian 2.54.1-1 packaging; inspect source build definition
+        run: bash scripts/inspect-debian-wpe.sh
+      - name: Preserve packaging analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debian-wpe-2541-build-definitions
+          path: |
+            dist/debian-review/debian/control
+            dist/debian-review/debian/rules
+            dist/debian-review/debian/patches/
+            dist/debian-review/build-depends-names.txt
+            dist/debian-review/ubuntu2404-candidates.txt
+          retention-days: 14
+          if-no-files-found: warn
