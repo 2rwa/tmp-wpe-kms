@@ -13,7 +13,7 @@ echo "::group::Install build dependencies"
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
   build-essential ninja-build cmake pkg-config python3 perl ruby bison flex gperf gettext \
-  curl xz-utils ca-certificates file patchelf git lld clang \
+  curl xz-utils ca-certificates file patchelf git lld clang unifdef \
   libglib2.0-dev libharfbuzz-dev libicu-dev libjpeg-dev libpng-dev libwebp-dev \
   libxml2-dev libxslt1-dev libsqlite3-dev libgcrypt20-dev libtasn1-6-dev \
   libepoxy-dev libsoup-3.0-dev libfreetype-dev libfontconfig-dev \
