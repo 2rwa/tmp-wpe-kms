@@ -46,7 +46,7 @@ jobs:
       - name: Install WPE 2.54+ packages
         run: |
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends             build-essential pkg-config file binutils ca-certificates             libwpewebkit-2.0-dev libgl1-mesa-dri libgbm1
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends             build-essential pkg-config file binutils ca-certificates python3 shared-mime-info libwpewebkit-2.0-dev libgl1-mesa-dri libgbm1
       - name: Inspect platform and build native launcher
         run: |
           set -eux

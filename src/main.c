@@ -53,7 +53,7 @@ static void on_load_changed(WebKitWebView *view, WebKitLoadEvent event, gpointer
         "const label=document.getElementById('mode-label');"
         "const sel=document.getElementById('platform-selector');"
         "const cmd=document.getElementById('command');"
-        "if(!mode||!label||!sel||!cmd) return 'FAIL: controls missing';"
+        "if(!mode||!label||!sel||!cmd) return 'FAIL: controls missing at '+location.href+' body='+(document.body?.innerText||'no body').slice(0,160);"
         "if(!cmd.textContent.includes('WPE_PLATFORM=drm')) return 'FAIL: initial DRM';"
         "mode.click();"
         "if(!label.textContent.includes('2GB')) return 'FAIL: mode change';"
