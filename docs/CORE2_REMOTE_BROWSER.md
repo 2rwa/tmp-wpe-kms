@@ -10,6 +10,7 @@
 - **物理キーボード入力成功:** libinput経由の入力がJavaScriptの `keydown` / `input` に到達し、41件 / 32件をイベント数ログで確認。
 - **スマホからURL切替成功:** LAN内の専用ページからHTTPSの外部ページに遷移する試験を実施。
 - **スマホリモコンの試験版を実装:** QR接続、トラックパッド風操作、クリック、スクロール、ASCIIの文字・操作キー送信。WPEの公開APIに直接入力イベントを渡す。QRリモコン版のActionsはビルド・Core2起動とも成功。すべての実Webサイトでのクリック・動画操作の互換性は未確認。
+- **WPE音声再生成功:** WPE WebKitのHTML5 Audioで出力先を一時ALSA設定（カード0・デバイス0）に切り替え、実機利用者がスピーカーからの音を確認（2026-10-17）。元のRunner環境ではPulseAudio接続拒否／ALSA defaultへの接続失敗があり、ブラウザ内部で再生が進んでも無音だった。WPE再ビルドなしで解消。YouTubeの動画・音声再生性能は未検証。
 - **軽量HTMLで安定:** 75秒間、WPE関連3プロセスの最大PSS **200.5 MiB**、最大RSS単純合計 **320.0 MiB**、Swap使用 **0 MiB**。これは**軽量ページ**の値であり、YouTube等の重いページや長時間運用を代表しません。
 
 ## 実機とビルド
@@ -63,6 +64,7 @@ Cランチャーが `wpe_view_event()`、`wpe_event_pointer_move_new()`、`wpe_e
 | メモリ | 3プロセス、最大PSS 200.5MiB、最大RSS計320.0MiB、Swap 0MiB | [75秒計測](https://github.com/2rwa/bridge/actions/runs/38908458229) |
 | URLリモコン | WPEをLANから外部HTTPS URLへ切替 | [実機試験](https://github.com/2rwa/bridge/actions/runs/38909984079) |
 | QR＋スマホ入力版 | 事前検証・Cランチャービルド・Core2上で10分間のジョブ成功 | [実機試験](https://github.com/2rwa/bridge/actions/runs/38915150110) |
+| WPE HTML5 Audio音声経路 | 一時ALSA設定で実機再生ポインタの進行を確認し、後続のスマホリモコン修正版で利用者が実音を確認 | [音声経路実機診断](https://github.com/2rwa/bridge/actions/runs/38927674995) / [音声対応QRリモコン](https://github.com/2rwa/bridge/actions/runs/38928072305) |
 
 **PSSとRSSについて:** PSSは共有メモリをプロセス間で按分した目安、RSSを単純合計すると共有ページが重複します。今回の値はシステム全体のピーク消費量でも2GiB環境での保証値でもありません。
 
