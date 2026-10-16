@@ -6,8 +6,6 @@ on:
       - .github/workflows/build-wpe-noble.yml
       - scripts/build-noble.sh
       - src/main.c
-      - docs/index.html
-      - docs/app.js
   workflow_dispatch:
 permissions:
   contents: write
