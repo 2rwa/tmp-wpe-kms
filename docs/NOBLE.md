@@ -6,6 +6,7 @@ This project builds a WPE WebKit **2.54.1 runtime from upstream verified source*
 - [Build script](../scripts/build-noble.sh)
 - [Releases](https://github.com/2rwa/tmp-wpe-kms/releases)
 - [Core2 device status](CORE2.md)
+- [Core2 public status report: LCD, keyboard, remote and memory](CORE2_REMOTE_BROWSER.md)
 
 ## Scope
 
@@ -14,7 +15,7 @@ This project builds a WPE WebKit **2.54.1 runtime from upstream verified source*
 - CPU flags: `-march=core2 -mtune=core2`, no SSE4/AVX assumed
 - WPEPlatform: DRM + headless enabled, Wayland + legacy API disabled
 - Browser controls checked via headless WebKit before publishing a prerelease
-- Direct DRM output on the Core2 LCD verified by **51 scanout framebuffer changes**; visual pixel/photographic evidence still pending
+- Direct DRM output was verified by **51 scanout framebuffer changes**, followed by visual confirmation of rendered text and colors by the user; no independent photograph has been archived
 - Published tar contains dynamic libraries and WebKit auxiliary processes, not all system libraries
 
 The release is published **only if the real build and headless WebKit test pass**.

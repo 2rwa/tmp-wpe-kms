@@ -62,10 +62,9 @@ WPEのJavaScript評価結果でDOM要素の存在、クリック操作、選択�
 詳細: [CORE2.md](CORE2.md)。Core2上でGBM/EGL/GLES2のコンテキスト生成、DRM master取得・解放が成功。
 HTMLをheadless ChromiumでPNGにレンダリングし、i915drmfbの1280x800/32bitメモリに転送。
 書き込み前にフレームバッファを退避し、書き込み後のreadbackと5秒後のrestoreが成功した。
-これは **WPE WebKitによる直接出力ではない**。WPE本体はCore2にまだインストールされていない。
-Core2の表示光学系の視認確認も未実施。
+これは **当時のWPEとは別系統の旧fbdev試験**。その後、WPE 2.54.1のソースビルド・Core2へのインストール・DRM/KMS直接描画と実機目視が成功した。以下の後続実験と [CORE2_REMOTE_BROWSER.md](CORE2_REMOTE_BROWSER.md) を参照。
 
 
 ## 2026-10-16 Core2実機WPE/KMSスキャンアウト検証
 
-Ubuntu 24.04互換ランタイムのビルド、Core2への展開、WPE headless回帰、DRM/KMSのスキャンアウト変更51回、および終了後のコンソール復帰が確認できた。現在の状況は[CORE2.md](CORE2.md)を参照。
+Ubuntu 24.04互換ランタイムのビルド、Core2への展開、WPE headless回帰、DRM/KMSのスキャンアウト変更51回、および終了後のコンソール復帰が確認できた。現在の状況は[CORE2.md](CORE2.md)および[リモートブラウザ実機レポート](CORE2_REMOTE_BROWSER.md)を参照。
