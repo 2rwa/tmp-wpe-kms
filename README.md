@@ -5,6 +5,8 @@ WPE WebKit 2.54+ の **WPEPlatform DRM/KMS** を使い、X11/Waylandなしで画
 - [ビルド・検証ダッシュボード (GitHub Pages)](https://2rwa.github.io/tmp-wpe-kms/)
 - [Actions](https://github.com/2rwa/tmp-wpe-kms/actions)
 - [実装と実機試験手順](docs/BUILD.md)
+- [Debian公式ビルド定義との比較](docs/DEBIAN_BUILD_REVIEW.md)
+- [Ubuntu 24.04向けソースビルド](docs/NOBLE.md)
 
 ## 実験の位置づけ
 
@@ -13,6 +15,6 @@ WPE WebKit 2.54+ の **WPEPlatform DRM/KMS** を使い、X11/Waylandなしで画
 CIでは `WPE_PLATFORM=headless` で実際にWebKitを起動し、DOM・JavaScriptの状態遷移を検証します。
 両方式ともX11/Waylandサーバーは必要ありません。
 
-**注意:** CIはDebian sidのパッケージ版WPEをリンクし、ランチャーをビルドします。
-WPEエンジンをソースからコンパイルするものではありません。また、CI成果物をそのままUbuntu 26.04で実行できるとは限りません。
-Ubuntuへの移植性と、古いGPUでのDRM/KMS実出力は未検証です。
+**注意:** 通常のCIはDebian sidのパッケージ版WPEでランチャーをビルドし、headlessで実行テストします。
+別のActionsジョブでUbuntu 24.04互換のWPEエンジン全体をソースビルドする実験も行っています。
+バイナリのOS間互換性、Core2実機でのWPEによるDRM/KMS直接出力はまだ未検証です。
