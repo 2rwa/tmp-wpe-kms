@@ -64,3 +64,8 @@ HTMLをheadless ChromiumでPNGにレンダリングし、i915drmfbの1280x800/32
 書き込み前にフレームバッファを退避し、書き込み後のreadbackと5秒後のrestoreが成功した。
 これは **WPE WebKitによる直接出力ではない**。WPE本体はCore2にまだインストールされていない。
 Core2の表示光学系の視認確認も未実施。
+
+
+## 2026-10-16 Core2実機WPE/KMSスキャンアウト検証
+
+Ubuntu 24.04互換ランタイムのビルド、Core2への展開、WPE headless回帰、DRM/KMSのスキャンアウト変更51回、および終了後のコンソール復帰が確認できた。現在の状況は[CORE2.md](CORE2.md)を参照。

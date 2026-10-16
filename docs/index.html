@@ -10,32 +10,32 @@
 <body>
 <main>
 <header>
-<p class="eyebrow">2GB RAM · Ubuntu Server · VGA/DRM-KMS</p>
+<p class="eyebrow">Core2 Duo · Ubuntu 24.04 · LVDS / DRM-KMS</p>
 <h1>WPE WebKit <span>Direct Display Lab</span></h1>
 <p class="intro">X11・Wayland・デスクトップ環境なしでHTML UIを描画するための、WPEPlatform 2.0 + DRM/KMS 実験。</p>
 <div class="links"><a href="https://github.com/2rwa/tmp-wpe-kms">Repository ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/actions">GitHub Actions ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/BUILD.md">技術詳細 ↗</a></div>
 </header>
 <section class="overview">
-<article class="panel"><span class="tag">CI BUILD</span><h2>Launcher + WPE 2.54+</h2><p>Debian sid のWPE WebKit開発パッケージを使い、実際のCランチャーをgccでコンパイル。DRMとheadless両バックエンドの存在を確認。</p></article>
+<article class="panel"><span class="tag">UBUNTU BUILD</span><h2>WPE WebKit 2.54.1</h2><p>Ubuntu 24.04のActionsでエンジン本体を4並列コンパイル・headlessテスト。<a href="https://github.com/2rwa/tmp-wpe-kms/releases/tag/core2-noble-wpe-2.54.1">Core2用ランタイム（約40MB）を公開</a>。</p></article>
 <article class="panel"><span class="tag">REGRESSION</span><h2>Headless / Browser</h2><p>WebKit headlessでHTMLを読み込み、ボタン操作 → 状態更新 → 表示変更を検証。Pages用のUIもChromiumで操作テスト。</p></article>
-<article class="panel"><span class="tag">TARGET</span><h2>No compositor</h2><p>ターゲットはUbuntu Serverの実機。<code>/dev/dri/card*</code>のGPU出力を使用。SSHで管理し、X11/Waylandは起動しません。</p></article>
+<article class="panel"><span class="tag">CORE2 KMS</span><h2>実機スキャンアウト更新</h2><p>Intel 965GM / i915 / 1280×800 LCDでWPEのDRM出力を実行。表示バッファ切替を51回検出し、終了後のコンソール復帰も確認。</p></article>
 </section>
 <section class="panel status"><span class="tag">LATEST BUILD</span><h2 id="ci-status" aria-live="polite">Actions結果を読み込み中</h2><p>Commit <code id="ci-commit">—</code> · WPE version <code id="ci-version">—</code></p><a id="ci-link" href="https://github.com/2rwa/tmp-wpe-kms/actions">Actionsの実行ログを見る ↗</a><p class="muted">Actionsの成功だけではVGA実機での描画成功を意味しません。</p></section>
 <section class="panel status">
-<span class="tag">CORE2 HARDWARE · 2026-10-16</span>
-<h2>Core2実機：fbdev書込・復元成功 / WPE直接出力は未検証</h2>
-<p><strong>Ubuntu 24.04.5 / Core 2 Duo T7250 / Intel 965GM (i915) / 1280×800</strong></p>
-<p>WPE 2.54.1はCI（Debian sid）でheadless実行成功。Core2実機では、Mesa EGL 1.5 / GLES 2.0、GBM、DRM masterの取得・解放を確認しました。</p>
-<p>Headless Chromiumで生成したHTML画像を <code>/dev/fb0</code> に書き込み、読み戻して、5秒後に元のフレームバッファへ復元。<strong>WPEエンジンによる直接画面表示はまだ実施していません。</strong></p>
-<p><a href="https://github.com/2rwa/bridge/actions/runs/38857859998">Core2 実機診断ログ ↗</a> · <a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/CORE2.md">詳細結果と次の手順 ↗</a></p>
-<p class="muted">フレームバッファの書込・読み戻しは検証済み。画面の見た目はカメラ等では確認していません。VGA端子は未接続、内蔵LVDS液晶が接続されています。</p>
+<span class="tag">CORE2 DIRECT DRM SCANOUT · 2026-10-16</span>
+<h2>WPE 2.54.1：DRM/KMS実機表示経路の更新を確認</h2>
+<p><strong>Ubuntu 24.04.5 / Intel Core 2 Duo T7250 / Intel 965GM (i915) / LVDS 1280×800</strong></p>
+<p>Core2本体にUbuntu 24.04互換WPEランタイムを導入し、headlessモードでHTML/JS動作確認。次にWPEPlatform DRMバックエンドでアニメーションHTMLをロードし、i915のCRTC・プライマリプレーンのスキャンアウトバッファが <code>fb=81 → 82 ↔ 80</code> と切り替わることを<strong>51回観測</strong>しました。</p>
+<p>WPE終了後は元の <code>fb=81</code> に復帰。検証はroot不要、X11/Wayland不要です。</p>
+<p><a href="https://github.com/2rwa/bridge/actions/runs/38899525934">51回のDRM更新ログ ↗</a> · <a href="https://github.com/2rwa/bridge/actions/runs/38899757249">終了後の復帰ログ ↗</a> · <a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/CORE2.md">詳しい技術検証 ↗</a></p>
+<p class="muted">DRMスキャンアウトの実更新は確認済み。ただし、液晶をカメラで撮った画像やテストページのピクセル内容は未確認です。</p>
 </section>
 <section class="panel"><span class="tag">INTERACTIVE DEMO</span><h2>起動コマンド・表示設定の確認</h2><p>以下はブラウザ上の設定プレビューです。ここで押してもPCのDRM/KMSは起動しません。</p>
 <div class="controls"><button id="mode-button" aria-pressed="false">メモリモード切替</button><strong id="mode-label">通常表示</strong><label for="platform-selector">Backend</label><select id="platform-selector"><option value="drm">DRM/KMS（実機）</option><option value="headless">Headless（CI）</option></select></div>
 <pre><code id="command">WPE_PLATFORM=drm ./dist/wpe-kms-launcher http://127.0.0.1:8080/</code></pre>
 </section>
-<section class="panel"><span class="tag">BUILD FLOW</span><h2>どこまで実証できるか</h2><ol><li><strong>静的テスト</strong> — JSの構文とUI動作</li><li><strong>ネイティブビルド</strong> — WPEPlatform 2.0 C APIへリンク</li><li><strong>WebKit実行テスト</strong> — headlessで読み込み→操作→描画状態の反映</li><li><strong>Core2実機</strong> — HTML画像→fbdevの実メモリ書込・復元、GBM/GLES2、DRM masterを確認済み</li><li><strong>未検証</strong> — WPEPlatformによるDRM/KMS直接画面表示、入力、2GBでのメモリ測定</li></ol></section>
-<footer>Experimental project · Binary built on Debian sid is not guaranteed to run on Ubuntu without rebuild · <a href="https://wpewebkit.org/about/faq.html">WPE FAQ ↗</a></footer>
+<section class="panel"><span class="tag">BUILD FLOW</span><h2>どこまで実証できるか</h2><ol><li><strong>静的テスト</strong> — JSの構文とUI動作</li><li><strong>ネイティブビルド</strong> — WPEPlatform 2.0 C APIへリンク</li><li><strong>WebKit実行テスト</strong> — headlessで読み込み→操作→描画状態の反映</li><li><strong>Core2実機</strong> — HTML画像→fbdevの実メモリ書込・復元、GBM/GLES2、DRM masterを確認済み</li><li><strong>Core2のWPE直接表示</strong> — i915 DRM/KMSの実スキャンアウト更新を51回検出し、元のコンソールへ復帰</li><li><strong>未検証</strong> — 目視したHTMLの内容、入力、2GBでのメモリ測定</li></ol></section>
+<footer>Experimental project · Ubuntu 24.04ネイティブ版WPEランタイムをCore2実機で検証済み · <a href="https://wpewebkit.org/about/faq.html">WPE FAQ ↗</a></footer>
 </main>
 </body>
 </html>
