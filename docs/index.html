@@ -13,14 +13,14 @@
 <p class="eyebrow">Core2 Duo · Ubuntu 24.04 · LVDS / DRM-KMS</p>
 <h1>WPE WebKit <span>Direct Display Lab</span></h1>
 <p class="intro">X11・Wayland・デスクトップ環境なしでHTML UIを描画するための、WPEPlatform 2.0 + DRM/KMS 実験。</p>
-<div class="links"><a href="https://github.com/2rwa/tmp-wpe-kms">Repository ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/actions">GitHub Actions ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/BUILD.md">技術詳細 ↗</a></div>
+<div class="links"><a href="https://github.com/2rwa/tmp-wpe-kms">Repository ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/actions">GitHub Actions ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/BUILD.md">技術詳細 ↗</a><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/CORE2_REMOTE_BROWSER.md">最新の実機成果 ↗</a></div>
 </header>
 <section class="overview">
 <article class="panel"><span class="tag">UBUNTU BUILD</span><h2>WPE WebKit 2.54.1</h2><p>Ubuntu 24.04のActionsでエンジン本体を4並列コンパイル・headlessテスト。<a href="https://github.com/2rwa/tmp-wpe-kms/releases/tag/core2-noble-wpe-2.54.1">Core2用ランタイム（約40MB）を公開</a>。</p></article>
 <article class="panel"><span class="tag">REGRESSION</span><h2>Headless / Browser</h2><p>WebKit headlessでHTMLを読み込み、ボタン操作 → 状態更新 → 表示変更を検証。Pages用のUIもChromiumで操作テスト。</p></article>
 <article class="panel"><span class="tag">CORE2 KMS</span><h2>実機スキャンアウト更新</h2><p>Intel 965GM / i915 / 1280×800 LCDでWPEのDRM出力を実行。表示バッファ切替を51回検出し、終了後のコンソール復帰も確認。</p></article>
 </section>
-<section class="panel status"><span class="tag">LATEST BUILD</span><h2 id="ci-status" aria-live="polite">Actions結果を読み込み中</h2><p>Commit <code id="ci-commit">—</code> · WPE version <code id="ci-version">—</code></p><a id="ci-link" href="https://github.com/2rwa/tmp-wpe-kms/actions">Actionsの実行ログを見る ↗</a><p class="muted">Actionsの成功だけではVGA実機での描画成功を意味しません。</p></section>
+<section class="panel status"><span class="tag">LATEST BUILD</span><h2 id="ci-status" aria-live="polite">Actions結果を読み込み中</h2><p>Commit <code id="ci-commit">—</code> · WPE version <code id="ci-version">—</code></p><a id="ci-link" href="https://github.com/2rwa/tmp-wpe-kms/actions">Actionsの実行ログを見る ↗</a><p class="muted">CIの成功は、スマホ操作の手触りやYouTube動画再生まで保証するものではありません。実機での確認結果は個別に記録しています。</p></section>
 <section class="panel status">
 <span class="tag">CORE2 DIRECT DRM SCANOUT · 2026-10-16</span>
 <h2>WPE 2.54.1：DRM/KMS実機表示経路の更新を確認</h2>
@@ -28,13 +28,21 @@
 <p>Core2本体にUbuntu 24.04互換WPEランタイムを導入し、headlessモードでHTML/JS動作確認。次にWPEPlatform DRMバックエンドでアニメーションHTMLをロードし、i915のCRTC・プライマリプレーンのスキャンアウトバッファが <code>fb=81 → 82 ↔ 80</code> と切り替わることを<strong>51回観測</strong>しました。</p>
 <p>WPE終了後は元の <code>fb=81</code> に復帰。検証はroot不要、X11/Wayland不要です。</p>
 <p><a href="https://github.com/2rwa/bridge/actions/runs/38899525934">51回のDRM更新ログ ↗</a> · <a href="https://github.com/2rwa/bridge/actions/runs/38899757249">終了後の復帰ログ ↗</a> · <a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/CORE2.md">詳しい技術検証 ↗</a></p>
-<p class="muted">DRMスキャンアウトの実更新は確認済み。ただし、液晶をカメラで撮った画像やテストページのピクセル内容は未確認です。</p>
+<p class="muted">後続の実機テストではLCDの文字と色を利用者が目視確認しました。独立した写真・画素ダンプは未保存です。</p>
+</section>
+<section class="panel status">
+<span class="tag">CORE2 SMARTPHONE REMOTE · 2026-10-16</span>
+<h2>QR接続・スマホ操作・物理キーボード</h2>
+<p>LAN上のスマートフォンでQRコードを読み取り、URL変更やタッチパッド風のマウス操作、クリック、スクロール、ASCIIキー入力を行う試験版を実装。X11/Waylandなしで、WPEPlatformのネイティブイベントを使います。</p>
+<p><strong>実機計測:</strong> 軽量HTMLを表示するWPE関連3プロセスで、75秒間の最大PSS <strong>200.5 MiB</strong>・最大RSS合計 <strong>320.0 MiB</strong>・Swap <strong>0 MiB</strong>。物理キーボードからJavaScriptへのイベント到達も確認。</p>
+<p><a href="https://github.com/2rwa/tmp-wpe-kms/blob/main/docs/CORE2_REMOTE_BROWSER.md">公開レポートと検証リンク ↗</a> · <a href="https://github.com/2rwa/bridge/actions/runs/38915150110">スマホQR版実機Actions ↗</a></p>
+<p class="muted">スマホ入力は試験実装です。YouTubeの動画・音声再生、日本語IME、2GiB RAM制限での動作は未検証。LAN HTTPリモコンをインターネットへ公開しないでください。</p>
 </section>
 <section class="panel"><span class="tag">INTERACTIVE DEMO</span><h2>起動コマンド・表示設定の確認</h2><p>以下はブラウザ上の設定プレビューです。ここで押してもPCのDRM/KMSは起動しません。</p>
 <div class="controls"><button id="mode-button" aria-pressed="false">メモリモード切替</button><strong id="mode-label">通常表示</strong><label for="platform-selector">Backend</label><select id="platform-selector"><option value="drm">DRM/KMS（実機）</option><option value="headless">Headless（CI）</option></select></div>
 <pre><code id="command">WPE_PLATFORM=drm ./dist/wpe-kms-launcher http://127.0.0.1:8080/</code></pre>
 </section>
-<section class="panel"><span class="tag">BUILD FLOW</span><h2>どこまで実証できるか</h2><ol><li><strong>静的テスト</strong> — JSの構文とUI動作</li><li><strong>ネイティブビルド</strong> — WPEPlatform 2.0 C APIへリンク</li><li><strong>WebKit実行テスト</strong> — headlessで読み込み→操作→描画状態の反映</li><li><strong>Core2実機</strong> — HTML画像→fbdevの実メモリ書込・復元、GBM/GLES2、DRM masterを確認済み</li><li><strong>Core2のWPE直接表示</strong> — i915 DRM/KMSの実スキャンアウト更新を51回検出し、元のコンソールへ復帰</li><li><strong>未検証</strong> — 目視したHTMLの内容、入力、2GBでのメモリ測定</li></ol></section>
+<section class="panel"><span class="tag">BUILD FLOW</span><h2>どこまで実証できるか</h2><ol><li><strong>静的テスト</strong> — JSの構文とUI動作</li><li><strong>ネイティブビルド</strong> — WPEPlatform 2.0 C APIへリンク</li><li><strong>WebKit実行テスト</strong> — headlessで読み込み→操作→描画状態の反映</li><li><strong>Core2実機</strong> — HTML画像→fbdevの実メモリ書込・復元、GBM/GLES2、DRM masterを確認済み</li><li><strong>Core2のWPE直接表示</strong> — i915 DRM/KMSの実スキャンアウト更新を51回検出し、元のコンソールへ復帰</li><li><strong>目視・キーボード</strong> — 内蔵LCDへの実描画と物理キーボードからのJavaScript入力を確認</li><li><strong>スマホリモコン</strong> — QR認証、URL送信、WPEへのネイティブ入力注入を試作</li><li><strong>未検証</strong> — YouTube動画再生・日本語IME・2GBでのメモリ計測</li></ol></section>
 <footer>Experimental project · Ubuntu 24.04ネイティブ版WPEランタイムをCore2実機で検証済み · <a href="https://wpewebkit.org/about/faq.html">WPE FAQ ↗</a></footer>
 </main>
 </body>
