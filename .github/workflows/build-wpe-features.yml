@@ -1,0 +1,50 @@
+name: Build isolated WPE WebGL and experimental WebRTC
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-wpe-features.yml
+      - scripts/build-noble-webgl-webrtc.sh
+      - src/feature-main.c
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  features:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare experimental build
+        run: |
+          bash -n scripts/build-noble-webgl-webrtc.sh
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/hostedtoolcache/CodeQL
+      - name: Build WPE and test headless runtime
+        shell: bash
+        run: bash scripts/build-noble-webgl-webrtc.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wpe-ubuntu2404-core2-webgl-webrtc-runtime
+          path: |
+            dist/*.tar.xz
+            dist/SHA256SUMS
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish only after successful experimental build
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: core2-noble-wpe-2.54.1-webgl-webrtc-exp
+          name: WPE 2.54.1 WebGL and experimental WebRTC
+          prerelease: true
+          make_latest: false
+          body: |
+            Separate experimental build: WebGL, GStreamer WebRTC and MediaStream ON.
+            Does not replace the existing Core2 release or its install prefix.
+            Headless DOM test and JS feature probes do not prove working GPU
+            acceleration, WebRTC peer connections, media capture or DRM output.
+          files: |
+            dist/wpe-webkit-2.54.1-ubuntu2404-core2-webgl-webrtc-x86_64.tar.xz
+            dist/SHA256SUMS
