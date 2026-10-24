@@ -1,0 +1,66 @@
+name: Build le00 x86-64 baseline WPE WebGL
+on:
+  push:
+    branches: [test/le00-wpe-webgl-baseline-20261024]
+    paths: [.github/workflows/build-le00-webgl-baseline.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm original build and derive x86-64 baseline in hosted workspace only
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq -- '-march=core2 -mtune=core2' scripts/build-noble.sh
+          cp scripts/build-noble.sh "$RUNNER_TEMP/build-noble-core2-original.sh"
+          sed -i 's/-march=core2 -mtune=core2/-march=x86-64 -mtune=generic/g' scripts/build-noble.sh
+          grep -Fq -- '-march=x86-64 -mtune=generic' scripts/build-noble.sh
+          if grep -Fq -- '-march=core2' scripts/build-noble.sh; then
+            echo 'Unexpected leftover Core2-only CPU instructions'; exit 1
+          fi
+          bash -n scripts/build-noble.sh
+          bash -n scripts/build-noble-webgl-webrtc.sh
+          echo 'Experimental generic x86-64 build, no permanent changes to stable source or release'
+      - name: Build WebGL + WebRTC variant with generic CPU baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/build-noble-webgl-webrtc.sh
+          cd dist
+          mv wpe-webkit-2.54.1-ubuntu2404-core2-webgl-webrtc-x86_64.tar.xz \
+             wpe-webkit-2.54.1-ubuntu2404-webgl-webrtc-x86_64-baseline.tar.xz
+          sha256sum wpe-webkit-2.54.1-ubuntu2404-webgl-webrtc-x86_64-baseline.tar.xz > SHA256SUMS
+          cat SHA256SUMS
+      - name: Preserve experimental build archive
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: le00-wpe-2.54.1-webgl-x86-64-baseline
+          path: |
+            dist/*.tar.xz
+            dist/SHA256SUMS
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Publish separate prerelease only on successful build and smoke test
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: le00-noble-wpe-2.54.1-webgl-x86_64-baseline-exp
+          name: WPE 2.54.1 WebGL x86-64 baseline (le00)
+          prerelease: true
+          make_latest: false
+          target_commitish: test/le00-wpe-webgl-baseline-20261024
+          body: |
+            Separate x86-64 baseline build for older AMD CPUs without SSSE3.
+            Preserves existing Core2 release. WebGL and experimental WebRTC are enabled.
+            Hosted-runner DOM test does not prove le00 hardware rendering.
+            This build archive retains the original compiled prefix and must be
+            launched on le00 with isolated library and WebKit executable overrides.
+          files: |
+            dist/wpe-webkit-2.54.1-ubuntu2404-webgl-webrtc-x86_64-baseline.tar.xz
+            dist/SHA256SUMS
