@@ -18,7 +18,7 @@ jobs:
           set -euo pipefail
           grep -Fq -- '-march=core2 -mtune=core2' scripts/build-noble.sh
           cp scripts/build-noble.sh "$RUNNER_TEMP/build-noble-core2-original.sh"
-          sed -i 's/-march=core2 -mtune=core2/-march=x86-64 -mtune=generic/g' scripts/build-noble.sh
+          sed -i 's/-march=core2/-march=x86-64/g; s/-mtune=core2/-mtune=generic/g' scripts/build-noble.sh
           grep -Fq -- '-march=x86-64 -mtune=generic' scripts/build-noble.sh
           if grep -Fq -- '-march=core2' scripts/build-noble.sh; then
             echo 'Unexpected leftover Core2-only CPU instructions'; exit 1
